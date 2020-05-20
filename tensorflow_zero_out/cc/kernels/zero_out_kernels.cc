@@ -19,12 +19,58 @@ using namespace tensorflow;
 
 class ZeroOutOp : public OpKernel {
  public:
-  explicit ZeroOutOp(OpKernelConstruction* context) : OpKernel(context) {}
+  
+  string filename;
+  string function;
+  explicit ZeroOutOp(OpKernelConstruction* context) : OpKernel(context) {
+    OP_REQUIRES_OK(context, context->GetAttr("filename", &filename));
+    OP_REQUIRES_OK(context, context->GetAttr("function", &function));
+  }
+
+  void Compute(OpKernelContext* context) override {
+
+
+    // Grab the input tensor
+    const Tensor& input_tensor = context->input(0);
+
+    // Create an output tensor
+    Tensor* output_tensor = NULL;
+    OP_REQUIRES_OK(context, context->allocate_output(0, input_tensor.shape(),
+                                                     &output_tensor));
+    // Set all but the first element of the output tensor to 0.
+    if (input_tensor.dtype() == DT_FLOAT) {
+        float* d = (float*)output_tensor->data();
+        for(int i=0; i<input_tensor.shape().num_elements(); i++) {
+            d[i] = 2;
+        }
+    } else {
+        double* d = (double*)output_tensor->data();
+        for(int i=0; i<input_tensor.shape().num_elements(); i++) {
+            d[i] = 3;
+        }
+    }
+
+
+  }
+};
+
+REGISTER_KERNEL_BUILDER(Name("Enzyme").Device(DEVICE_CPU), ZeroOutOp);
+
+class EnzymeG : public OpKernel {
+ public:
+    string filename;
+    string function;
+  explicit EnzymeG(OpKernelConstruction* context) : OpKernel(context) {
+    OP_REQUIRES_OK(context, context->GetAttr("filename", &filename));
+    OP_REQUIRES_OK(context, context->GetAttr("function", &function));
+  }
 
   void Compute(OpKernelContext* context) override {
     // Grab the input tensor
     const Tensor& input_tensor = context->input(0);
     auto input = input_tensor.flat<int32>();
+    const Tensor& outp = context->input(1);
+     
 
     // Create an output tensor
     Tensor* output_tensor = NULL;
@@ -34,13 +80,12 @@ class ZeroOutOp : public OpKernel {
 
     // Set all but the first element of the output tensor to 0.
     const int N = input.size();
-    for (int i = 1; i < N; i++) {
-      output_flat(i) = 0;
+    int32_t* d = (int32_t*)output_tensor->data();
+    for(int i=0; i<N; i++) {
+        d[i] = 2;
     }
 
-    // Preserve the first input value if possible.
-    if (N > 0) output_flat(0) = input(0);
   }
 };
 
-REGISTER_KERNEL_BUILDER(Name("ZeroOut").Device(DEVICE_CPU), ZeroOutOp);
+REGISTER_KERNEL_BUILDER(Name("EnzymeG").Device(DEVICE_CPU), EnzymeG);
