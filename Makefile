@@ -16,7 +16,7 @@ ZERO_OUT_TARGET_LIB = tf_enzyme/python/ops/_enzyme_ops.so
 zero_out_op: $(ZERO_OUT_TARGET_LIB)
 
 $(ZERO_OUT_TARGET_LIB): $(ZERO_OUT_SRCS)
-	$(CXX) $(CFLAGS) -o $@ $^ ${LDFLAGS}
+	$(CXX) $(CFLAGS) -o $@ $^ ${LDFLAGS} -lffi
 
 zero_out_pip_pkg: $(ZERO_OUT_TARGET_LIB)
 	./build_pip_pkg.sh make artifacts

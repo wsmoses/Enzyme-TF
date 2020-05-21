@@ -24,10 +24,12 @@ from tensorflow.python.framework import ops
 
 enzyme_ops = load_library.load_op_library(
     resource_loader.get_path_to_datafile('_enzyme_ops.so'))
-enzyme = enzyme_ops.enzyme
+
+def enzyme(*args, filename, function):
+    return enzyme_ops.enzyme(args, filename=filename, function=function)
 
 @ops.RegisterGradient("Enzyme")
 def _enzyme_grad(op, grad):
     print(dir(enzyme_ops))
     print(op.attrs)
-    return enzyme_ops.enzyme_g(op.inputs[0], grad, filename=op.attrs[1], function=op.attrs[3])
+    return enzyme_ops.enzyme_g(list(op.inputs) + [grad], filename=op.attrs[1], function=op.attrs[3])
