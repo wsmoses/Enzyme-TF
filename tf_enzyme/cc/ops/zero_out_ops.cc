@@ -32,8 +32,9 @@ REGISTER_OP("Enzyme")
 
 REGISTER_OP("EnzymeG")
     .Attr("N: int")
+    .Attr("M: int")
     .Input("in: N * float")
-    .Output("out: float")
+    .Output("out: M * float")
     .Attr("filename: string")
     .Attr("function: string")
     .SetShapeFn([](::tensorflow::shape_inference::InferenceContext* c) {

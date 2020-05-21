@@ -30,6 +30,4 @@ def enzyme(*args, filename, function):
 
 @ops.RegisterGradient("Enzyme")
 def _enzyme_grad(op, grad):
-    print(dir(enzyme_ops))
-    print(op.attrs)
-    return enzyme_ops.enzyme_g(list(op.inputs) + [grad], filename=op.attrs[1], function=op.attrs[3])
+    return enzyme_ops.enzyme_g(list(op.inputs) + [grad], filename=op.attrs[op.attrs.index("filename")+1], function=op.attrs[op.attrs.index("function")+1], M=len(op.inputs))
