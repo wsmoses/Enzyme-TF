@@ -19,10 +19,11 @@ print(args.enzyme)
 
 def hmlstm_update_c(z, zb, c, f, i, g):
     if args.enzyme:
-        return enzyme(z, zb, c, f, i, g, filename="test.cpp", function="f")
+        return enzyme(z, zb, c, f, i, g, filename="test2.cpp", function="f")
     i = tf.sigmoid(i)
     g = tf.tanh(g)
     f = tf.sigmoid(f)
+
     return tf.where(
         tf.equal(z, tf.constant(1., dtype=tf.float32)),
         tf.multiply(i, g),
@@ -33,9 +34,11 @@ def hmlstm_update_c(z, zb, c, f, i, g):
         )
     )
 
+
 class Benchmark:
     def __init__(self, dims):
         # set up control variables
+        tf.random.set_seed(0)
         self.z = tf.Variable(tf.cast(tf.less(tf.random.uniform([dims]), 0.5), dtype=tf.float32))
         self.zb = tf.Variable(tf.cast(tf.less(tf.random.uniform([dims]), 0.5), dtype=tf.float32))
 
@@ -56,8 +59,20 @@ class Benchmark:
           t.watch(self.g)
           new_c = hmlstm_update_c(self.z, self.zb, self.c, self.f, self.i, self.g)
         # dy = 2x
+        #print("new_c", new_c)
         dy_dx = t.gradient(new_c, [self.c, self.f, self.i, self.g])
+        print([x.numpy() if x is not None else x for x in dy_dx ])
         pass
+
+    def cmp(self):
+        args.enzyme = False
+        old_c = hmlstm_update_c(self.z, self.zb, self.c, self.f, self.i, self.g)
+        print("old_c", old_c)
+        args.enzyme = True
+        new_c = hmlstm_update_c(self.z, self.zb, self.c, self.f, self.i, self.g)
+        print(self.i)
+        print("new_c", new_c)
+        print("diff", old_c - new_c)
 
     def run(self):
         #sess.run([self.c_grad, self.f_grad, self.i_grad, self.g_grad], **kwargs)
@@ -104,6 +119,7 @@ if __name__ == '__main__':
     print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
     b = Benchmark(args.dims)
+    #b.cmp()
     b.warmup()
     t = timeit.Timer("b.run()", globals=globals())
     its, total_time = t.autorange()

@@ -119,9 +119,9 @@ class ZeroOutOp : public OpKernel {
 
     // Create an output tensor
     Tensor* output_tensor = NULL;
-    OP_REQUIRES_OK(context, context->allocate_output(0, context->input(0).shape(),
+    OP_REQUIRES_OK(context, context->allocate_output(0, context->input(context->num_inputs()-1).shape(),
                                                      &output_tensor));
-    printf("running compute\n");
+    //printf("running compute\n");
 
     // Describe the function arguments. Note that ffi_type_pointer is used
     // for any C pointer (the pointee type does not matter in the ABI).
@@ -202,6 +202,7 @@ class EnzymeG : public OpKernel {
         Tensor* dinp = NULL;
         OP_REQUIRES_OK(context, context->allocate_output(i, input_tensor.shape(), &dinp));
         datas[2*i+1] = dinp->data();
+        //printf("data is aligned: %d:\n", dinp->IsAligned());
 
         sizes[i] = input_tensor.shape().num_elements();
 
@@ -215,9 +216,9 @@ class EnzymeG : public OpKernel {
     void* outd = doutput_tensor.data();
     avalues.push_back(&outd);
 
-    printf("avalues.size()=%d args.size()=%d\n", avalues.size(), args.size());
+    //printf("avalues.size()=%d args.size()=%d\n", avalues.size(), args.size());
 
-    printf("running dcompute\n");
+    //printf("running dcompute\n");
     ffi_call(&cif, FFI_FN(diffef), NULL, avalues.data());
   }
 };

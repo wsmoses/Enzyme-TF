@@ -26,7 +26,6 @@ REGISTER_OP("Enzyme")
     .Attr("filename: string")
     .Attr("function: string")
     .SetShapeFn([](::tensorflow::shape_inference::InferenceContext* c) {
-      c->set_output(0, c->input(0));
       return Status::OK();
     });
 
@@ -38,6 +37,5 @@ REGISTER_OP("EnzymeG")
     .Attr("filename: string")
     .Attr("function: string")
     .SetShapeFn([](::tensorflow::shape_inference::InferenceContext* c) {
-      c->set_output(0, c->input(0));
       return Status::OK();
     });
